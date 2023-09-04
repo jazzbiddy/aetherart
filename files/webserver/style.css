@@ -1,0 +1,40 @@
+body, div {
+  font-family: 'Source Sans Pro', sans-serif;
+}
+
+.row {
+  margin-right: 0px;
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
+
+.groupTitle {
+  color:#6c757d;
+  font-size: 20px;
+  font-weight: 700;
+  margin-left: -15px;
+}
+
+.formZone {
+  background-color: #e3e6e9;
+  padding-top:20px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  border: 1px solid #d7d2d2;
+}
+
+.smallInput {
+  width: 60%;
+}
+
