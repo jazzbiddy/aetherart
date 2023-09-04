@@ -1,0 +1,9 @@
+{
+    "categories": "cats, dogs, turtles",
+    "refresh_interval": 15,
+    "orientation": 1,
+    "content_filter": 1,
+    "screen_number": 1,
+    "frame_number": 1,
+    "api_key": ""
+}
