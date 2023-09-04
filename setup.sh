@@ -112,8 +112,5 @@ curl -o $APPFILES_PATH $APPFILES_URL
 
 
 
-# Wrap it all up with a reboot.
-# if everything worked, the Aether Art photo viewer should launch
 
-sudo reboot
 
