@@ -1,8 +1,6 @@
 #!/bin/bash
 
 ### THIS SCRIPT IS TRIGGERED BY A CRONJOB ON BOOT
-### To Modify Startup, use this command
-### sudo crontab -e
 
 APP_DIR="/home/pi/aetherart"
 LOGFILE="/home/pi/aetherart/logs"
@@ -20,4 +18,3 @@ sleep 5
 
 # Run slideshower.py in the foreground
 sudo python aetherart.py >> "$APPLOG_FILE" 2>&1 &
-
