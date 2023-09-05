@@ -67,9 +67,9 @@ fi
 cron_line="@reboot sh $LAUNCHER_PATH >$LOGFILE_PATH 2>&1"
 
 # Check if the line is already in the crontab
-if ! (sudo crontab -l | grep -Fxq "$cron_line"); then
+if ! (crontab -l | grep -Fxq "$cron_line"); then
     # If it's not present, add the line
-    (sudo crontab -l ; echo "$cron_line") | sudo crontab -
+    (crontab -l ; echo "$cron_line") | crontab -
     echo "Crontab entry added."
 else
     echo "Crontab entry already exists."
