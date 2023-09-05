@@ -3,29 +3,27 @@
 
 HOME_DIR="/home/pi"
 APP_DIR_NAME="aetherart"
-FRAMES_DIR_NAME="frames"
 IMAGES_DIR_NAME="images"
 TEMP_DIR_NAME="temp"
 LOGS_DIR_NAME="logs"
-WEBSERVER_DIR_NAME="webserver"
 LAUNCHER_NAME="launcher.sh"
 LOGFILE_NAME="cron.log"
 APPFILES_NAME="files.zip"
 APPFILES_URL="https://github.com/jazzbiddy/aetherart/archive/refs/heads/main.zip"
-
+UNZIPPEDFILES_NAME="aetherart-main/files"
 
 ################
 
 
 APP_DIR="$HOME_DIR/$APP_DIR_NAME"
-FRAMES_DIR="$APP_DIR/$FRAMES_DIR_NAME"
 IMAGES_DIR="$APP_DIR/$IMAGES_DIR_NAME"
 TEMP_DIR="$APP_DIR/$TEMP_DIR_NAME"
-WEBSERVER_DIR="$APP_DIR/$WEBSERVER_DIR_NAME"
 LAUNCHER_PATH="$APP_DIR/$LAUNCHER_NAME"
 LOGS_DIR="$APP_DIR/$LOGS_DIR_NAME"
 LOGFILE_PATH="$LOGS_DIR/$LOGFILE_NAME"
 APPFILES_PATH="$TEMP_DIR/$APPFILES_NAME"
+UNZIPPEDFILES_PATH="$TEMP_DIR/$UNZIPPEDFILES_NAME/*"
+
 
 ### CREATE DIRECTORIES
 
@@ -37,28 +35,12 @@ else
   echo "App Directory created"
 fi
 
-#FRAMES_DIR
-if [ -d "$FRAMES_DIR" ]; then
-  echo "Frames Directory already exists"
-else
-  mkdir -p "$FRAMES_DIR"
-  echo "Frames Directory created"
-fi
-
 #IMAGES_DIR
 if [ -d "$IMAGES_DIR" ]; then
   echo "Images Directory already exists"
 else
   mkdir -p "$IMAGES_DIR"
   echo "Images Directory created"
-fi
-
-#WEBSERVER_DIR
-if [ -d "$WEBSERVER_DIR" ]; then
-  echo "Webserver Directory already exists"
-else
-  mkdir -p "$WEBSERVER_DIR"
-  echo "Webserver Directory created"
 fi
 
 #LOGS
@@ -99,18 +81,27 @@ pip install requests pillow pygame
 
 
 ### DOWNLOAD APP FILES 
-curl -o $APPFILES_PATH $APPFILES_URL
+echo "Downloading files from $APPFILES_URL"
+curl -Lo $APPFILES_PATH $APPFILES_URL
 
 ### UNZIP APPFILES
-
+unzip -o $APPFILES_PATH -d $TEMP_DIR
 
 ### PUT APP FILES INTO THE RIGHT PLACES
-
+echo "Copying files from: $UNZIPPEDFILES_PATH to: $APP_DIR"
+cp -ru $UNZIPPEDFILES_PATH $APP_DIR
 
 ### DELETE TEMPORARY APP FILES
+echo "removing temp directory"
+rm -rf $TEMP_DIR
 
 
 
-
-
+# Wrap it all up with a reboot.
+# if everything worked, the Aether Art photo viewer should launch
+echo ""
+echo "##################"
+echo "Setup Complete!"
+echo "enter 'sudo reboot' to restart"
+echo "##################"
 
