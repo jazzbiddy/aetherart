@@ -15,7 +15,7 @@ import socket
 screen_number = 1
 # SlideShow Information
 refresh_interval = 5
-categories = 'cats, dogs, turtles'
+categories = 'turtles, cats, dogs'
 orientation = 1
 content_filter = 1
 frame_number = 1
@@ -121,7 +121,6 @@ def getLocalIPAddress():
     except Exception as e:
         return str(e)
 
-
 def get_resolution():
     pygame.init()
     # num_screens = pygame.display.get_num_displays()
@@ -174,9 +173,6 @@ photo_default_height = 1560
 
 system_ip_address = getLocalIPAddress()
 print ('Pi IP Addr: ' + str(system_ip_address))
-
-
-
 
 
 
@@ -358,6 +354,9 @@ def check_reload_flag():
     if os.path.exists('reload_flag.txt'):
         os.remove('reload_flag.txt')
         print ("reload flag found!")
+        
+        # reload settings
+        load_settings()
         image_change_time = 0
 
 
@@ -424,6 +423,7 @@ while slideshow_running:
             if event.key == pygame.K_p:  # Check if the 'p' key is pressed. if it is - quit
                 slideshow_running = False           
 
+    
     currentTime = time.time()
 
     # force load check
