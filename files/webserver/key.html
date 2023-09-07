@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+
+    <link rel="stylesheet" type="text/css" href="style.css">
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous" />
+
+
+
+
+    <title>Aether Art - web configuration tool</title>
+  </head>
+  <body>
+
+    <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+      <a class="navbar-brand" href="/">Aether Art Configurator</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/settings">Settings</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/key">Photo Setup</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  
+    <br>
+
+    <div class="container-fluid">
+
+      <div id="update_message" class="alert alert-info style="display:none">
+        <strong>Waiting for Update</strong><br>When the Aether Art display updates, this message will go away.
+      </div>
+
+
+      <div class="col-sm">
+        <span class="groupTitle">Instructions</span>
+      </div>
+
+      <div id="pnlInstructionsRow" class="alert alert-warning">
+          
+          The photos that appear in the Aether Art frame are downloaded from the <a href="https://unsplash.com/" target="_blank"><b>Unsplash</b></a> photo service. 
+          You will need to create a free account with this service for the frame to work. <br><br>
+
+          <b>Follow these steps to sign up for an Access Key:</b><br><br>
+
+          <ul>
+            <li>Visit the Unsplash Developers web page at <a href="https://unsplash.com/developers" target="_blank"><b>https://unsplash.com/developers</b></a>.</li>
+            <li>Click on the "<b>Register as a Developer</b>" in the menu on that page.</li>
+            <li>Fill out the <b>Join Unsplash Registration Form</b> with your information.</li>
+            <li>After completing the form you will be presented with the Welcome screen. </li>
+            <li>Click on the "<b>New Application</b>" link in the middle of the page.</li>
+            <li>Read and Accept their terms of use. A popup will appear asking for the Application Name and Description.</li>
+            <li>Enter "<em>Photo Viewer</em>" for the <b>Application name</b></li>
+            <li>Enter "<em>A personal use application that displays photos</em>" for the <b>Description</b> and submit the form.</li>
+            <li>In the middle of the next page you will see a section labelled "<b>Keys</b>". </li>
+            <li>Copy the "<b>Access Key</b>".</li>
+            <li>Done!</li>
+        </ul>
+
+       
+        Once you have the Access Key copied, enter it into the form below and click submit. <br>
+        Your Aether Art frame will update and start displaying photos! 
+        <br><br>
+
+
+
+          
+      </div>
+
+
+
+      <form action="/key" method="post">
+        
+        <div class="col-sm">
+          <span class="groupTitle">Photo Setup</span>
+        </div>
+
+        <div id="pnlform" class="formZone">
+
+          
+
+          
+
+          <div class="form-group">
+            <label class="labelBold">Unsplash Access Key</label>
+            <div class="input-group">
+              <input id="api_key" name="api_key" type="password" class="form-control"> 
+              <div class="input-group-append" style="cursor:  pointer;">
+                <div class="input-group-text" onclick="password_show_hide();">
+                  <i class="fa fa-eye" id="show_eye"></i>
+                  <i class="fa fa-eye-slash d-none" id="hide_eye"></i>
+                </div>
+              </div>
+            </div>
+
+            <small id="screenNumberHelp" class="form-text text-muted">Enter your <a href="https://unsplash.com/developers" target="_blank">Unsplash</a> Access Key in this field. </small>
+          </div>
+          
+          <button type="submit" class="btn btn-primary">Submit</button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+
+   
+    
+  </body>
+
+  <script>
+
+    function password_show_hide() {
+        var x = document.getElementById("api_key");
+        var show_eye = document.getElementById("show_eye");
+        var hide_eye = document.getElementById("hide_eye");
+        hide_eye.classList.remove("d-none");
+        if (x.type === "password") {
+          x.type = "text";
+          show_eye.style.display = "none";
+          hide_eye.style.display = "block";
+        } else {
+          x.type = "password";
+          show_eye.style.display = "block";
+          hide_eye.style.display = "none";
+        }
+    }
+
+    //values injected by webserver
+    let api_key = '{{api_key}}';
+    let awaiting_frame_update = '{{awaiting_frame_update}}';
+
+    //form fields
+    var inputApiKey = document.getElementById("api_key");
+
+    //set initial values
+    inputApiKey.value = api_key;
+
+    //various panels that we will show or hide
+    let updateAlert = document.getElementById ('update_message');
+
+    //check form save status
+    if (awaiting_frame_update == 'True') {
+      updateAlert.style.display = "block";
+    } else {
+      updateAlert.style.display = "none";
+    }
+
+    //reload timer when waiting for updates
+    if (awaiting_frame_update == 'True') {
+      setTimeout(function () {
+      location.reload(); // Reloads the current page
+      }, 5000); // 5000 milliseconds (5 seconds)
+    }
+
+
+  </script>
+
+
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  
+    <!--bootstrap select - https://developer.snapappointments.com/bootstrap-select/-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
+
+
+</html>

@@ -44,7 +44,7 @@
           <a class="nav-link" href="/settings">Settings</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="/api">Photo Setup</a>
+          <a class="nav-link" href="/key">Photo Setup</a>
         </li>
       </ul>
     </div>
@@ -61,7 +61,9 @@
 
 
 
-
+  <div id="update_message" class="alert alert-info style="display:none">
+  <strong>Waiting for Update</strong><br>When the Aether Art display updates, this message will go away.
+  </div>
 
 
 
@@ -157,6 +159,7 @@
   let last_photo_time = '{{last_photo_time}}';
   let next_photo_time = '{{next_photo_time}}';
   let api_limit = '{{api_limit}}';
+  let awaiting_frame_update = '{{awaiting_frame_update}}';
 
   //form fields
   var lblLastPhotoTime = document.getElementById("last_photo_time");
@@ -168,6 +171,22 @@
   lblNextPhotoTime.textContent = next_photo_time;
   lblApiLimit.textContent = api_limit + ' more updates this hour.';
 
+  //various panels that we will show or hide
+  let updateAlert = document.getElementById ('update_message');
+
+  //check form save status
+  if (awaiting_frame_update == 'True') {
+    updateAlert.style.display = "block";
+  } else {
+    updateAlert.style.display = "none";
+  }
+
+  //reload timer when waiting for updates
+  if (awaiting_frame_update == 'True') {
+      setTimeout(function () {
+      location.reload(); // Reloads the current page
+      }, 5000); // 5000 milliseconds (5 seconds)
+  }
 
 
 </script>

@@ -38,6 +38,7 @@ last_photo_time = ''
 next_photo_time = ''
 frame_path = ''
 settings_filename = 'settings.json'
+force_load_found = False
 
 
 def load_settings():
@@ -184,6 +185,7 @@ def getLocalTime(timestamp):
     return formatted_time
 
 def updateStatus():
+    global force_load_found
 
     try:
         with open(settings_filename, 'r') as json_file:
@@ -199,6 +201,12 @@ def updateStatus():
             
             # Save the updated settings back to the JSON file
             save_settings(settings)
+
+            #write the reload success file
+            if force_load_found:
+                open('reload_success.txt', 'w').close()
+                force_load_found = False
+
     except FileNotFoundError:
         print('Error saving status updates')
 
@@ -426,6 +434,8 @@ def merge_photo_and_frame():
 
 def check_reload_flag():
     global image_last_change_time
+    global force_load_found
+
     # Check for the exit signal flag file
     if os.path.exists('reload_flag.txt'):
         os.remove('reload_flag.txt')
@@ -434,14 +444,13 @@ def check_reload_flag():
         # reload settings
         load_settings()
         image_last_change_time = 0
-
-
+        force_load_found = True
 
 def show_error_screen(error_type):
 
     if error_type == 1:
         screen_msg1 = "Missing Photos Access Key"
-        screen_msg2 = "Open configuration webpage at http://" + str(system_ip_address) + "/api"
+        screen_msg2 = "Open configuration webpage at http://" + str(system_ip_address) + "/key"
         screen_msg3 = "To enter your access key."  
         
     elif error_type == 2:

@@ -1,11 +1,13 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 import urllib.parse
+import os
 
-save_status = 0
+awaiting_frame_update = False
+image_file_path = 'images/image.jpg'
 
 
-# Load the settings from the JSON file
+
 def load_settings():
     try:
         with open('settings.json', 'r') as json_file:
@@ -26,14 +28,22 @@ def load_settings():
 
         }
 
-# Save the settings to the JSON file
 def save_settings(settings):
     with open('settings.json', 'w') as json_file:
         json.dump(settings, json_file, indent=4)
 
+def check_reload_success():
+    global awaiting_frame_update
+    # Check for the reload success flag file
+    if os.path.exists('reload_success.txt'):
+        os.remove('reload_success.txt')
+        print ("reload success flag found!")
+        
+        awaiting_frame_update = False
+
+
 class MyHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        global save_status 
         
         if self.path == '/':
             # Serve the HTML form for the main page
@@ -41,6 +51,9 @@ class MyHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             
+            if awaiting_frame_update:
+                check_reload_success()
+
             with open('webserver/index.html', 'r') as html_file:
                 html_content = html_file.read()
 
@@ -52,7 +65,9 @@ class MyHandler(BaseHTTPRequestHandler):
                 html_content = html_content.replace('{{api_limit}}',  str(settings['api_limit']))
                 html_content = html_content.replace('{{last_photo_time}}',  str(settings['last_photo_time']))
                 html_content = html_content.replace('{{next_photo_time}}',  str(settings['next_photo_time']))
+                html_content = html_content.replace('{{awaiting_frame_update}}',  str(awaiting_frame_update))
                 
+            
 
             self.wfile.write(html_content.encode())
 
@@ -62,6 +77,9 @@ class MyHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             
+            if awaiting_frame_update:
+                check_reload_success()
+
             with open('webserver/settings.html', 'r') as html_file:
                 html_content = html_file.read()
 
@@ -75,20 +93,22 @@ class MyHandler(BaseHTTPRequestHandler):
                 html_content = html_content.replace('{{orientation}}',  str(settings['orientation']))
                 html_content = html_content.replace('{{content_filter}}', str(settings['content_filter']))
                 html_content = html_content.replace('{{screen_number}}',  str(settings['screen_number']))
-                html_content = html_content.replace('{{save_status}}',  str(save_status))
+                html_content = html_content.replace('{{awaiting_frame_update}}',  str(awaiting_frame_update))
                 
                 
 
             self.wfile.write(html_content.encode())
-            save_status = 0
 
-        elif self.path == '/api':
+        elif self.path == '/key':
             # Serve the HTML form for the main page
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             
-            with open('webserver/api.html', 'r') as html_file:
+            if awaiting_frame_update:
+                check_reload_success()
+
+            with open('webserver/key.html', 'r') as html_file:
                 html_content = html_file.read()
 
                 # Load settings from the JSON file
@@ -97,7 +117,7 @@ class MyHandler(BaseHTTPRequestHandler):
                 # Inject the settings values into the HTML form fields
                 
                 html_content = html_content.replace('{{api_key}}', str(settings['api_key']))
-                html_content = html_content.replace('{{save_status}}',  str(save_status))
+                html_content = html_content.replace('{{awaiting_frame_update}}',  str(awaiting_frame_update))
                 
 
             self.wfile.write(html_content.encode())
@@ -115,14 +135,14 @@ class MyHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'image/jpeg')
             self.end_headers()
-            with open('images/image.jpg', 'rb') as file:
+            with open(image_file_path, 'rb') as file:
                 self.wfile.write(file.read())
             
         else:
             self.send_error(404, "File not found")
     
     def do_POST(self):
-        global save_status
+        global awaiting_frame_update
 
         if self.path == '/settings':
             content_length = int(self.headers['Content-Length'])
@@ -145,15 +165,16 @@ class MyHandler(BaseHTTPRequestHandler):
 
             # Save the updated settings back to the JSON file
             save_settings(settings)
-            save_status= 1
-
-            open('reload_flag.txt', 'w').close()
+           
+            if (not awaiting_frame_update):
+                open('reload_flag.txt', 'w').close()
+                awaiting_frame_update = True
 
             self.send_response(302)
-            self.send_header('Location', '/settings')
+            self.send_header('Location', '/')
             self.end_headers()
 
-        elif self.path == '/api':
+        elif self.path == '/key':
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length).decode()
             post_vars = dict(x.split("=") for x in post_data.split("&"))
@@ -166,17 +187,20 @@ class MyHandler(BaseHTTPRequestHandler):
             
             # Save the updated settings back to the JSON file
             save_settings(settings)
-            save_status= 1
             
-            open('reload_flag.txt', 'w').close()
+            if (not awaiting_frame_update):
+                open('reload_flag.txt', 'w').close()
+                awaiting_frame_update = True
 
             self.send_response(302)
-            self.send_header('Location', '/api')
+            self.send_header('Location', '/')
             self.end_headers()
         
         elif self.path == '/photo':
             
-            open('reload_flag.txt', 'w').close()
+            if (not awaiting_frame_update):
+                open('reload_flag.txt', 'w').close()
+                awaiting_frame_update = True
 
             self.send_response(302)
             self.send_header('Location', '/')

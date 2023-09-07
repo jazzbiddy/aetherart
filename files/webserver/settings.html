@@ -39,7 +39,7 @@
               <a class="nav-link" href="/settings">Settings</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/api">Photo Setup</a>
+              <a class="nav-link" href="/key">Photo Setup</a>
             </li>
           </ul>
         </div>
@@ -49,9 +49,9 @@
 
     <div class="container-fluid">
 
-        <div id="save_success" class="alert alert-success alert-dismissible" style="display:none">
-            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-            <strong>Success!</strong><br> Your settings were saved. The Aether Art display will refresh shortly.
+
+        <div id="update_message" class="alert alert-info style="display:none">
+            <strong>Waiting for Update</strong><br>When the Aether Art display updates, this message will go away.
         </div>
 
 
@@ -136,7 +136,7 @@
     let orientation = '{{orientation}}';
     let content_filter = '{{content_filter}}';
     let screen_number = '{{screen_number}}';
-    let save_status = '{{save_status}}';
+    let awaiting_frame_update = '{{awaiting_frame_update}}';
 
     //form fields
     var inputCategories = document.getElementById("categories");
@@ -152,16 +152,22 @@
     inputContentFilter.value = content_filter;
     inputScreenNumber.value = screen_number;
 
-
     //various panels that we will show or hide
-    let formSuccessAlert = document.getElementById ('save_success');
+    let updateAlert = document.getElementById ('update_message');
 
     //check form save status
-    if (save_status == 1) {
-        formSuccessAlert.style.display = "block";
+    if (awaiting_frame_update == 'True') {
+    updateAlert.style.display = "block";
+    } else {
+    updateAlert.style.display = "none";
     }
 
-
+    //reload timer when waiting for updates
+    if (awaiting_frame_update == 'True') {
+        setTimeout(function () {
+        location.reload(); // Reloads the current page
+        }, 5000); // 5000 milliseconds (5 seconds)
+    }
 
   </script>
 
