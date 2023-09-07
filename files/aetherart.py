@@ -134,7 +134,7 @@ def getLocalIPAddress():
 
         has_ip_address = True
 
-        print ('Pi IP Addr: ' + str(system_ip_address))
+        print ('IP Addr: ' + str(system_ip_address))
 
         return ip_address
         
@@ -451,30 +451,34 @@ def show_error_screen(error_type):
     if error_type == 1:
         screen_msg1 = "Missing Photos Access Key"
         screen_msg2 = "Open configuration webpage at http://" + str(system_ip_address) + "/key"
-        screen_msg3 = "To enter your access key."  
+        screen_msg3 = "To enter your access key."
+        background_color = (246,150,121)  
         
     elif error_type == 2:
         screen_msg1 = "Invalid Photos Access Key"
         screen_msg2 = "Error using provided key"
         screen_msg3 = "Use configuration webpage at http://" + str(system_ip_address) + " to fix."
+        background_color = (125,167,217)
     
     elif error_type == 3:
         screen_msg1 = "Issue Getting Photo"
         screen_msg2 = "There was an unknown error :( "
         screen_msg3 = "Check configuration webpage at http://" + str(system_ip_address) + " to fix."
+        background_color = (244,154,193)
 
     elif error_type == 4:
         screen_msg1 = "Issue Getting IP Address. [Retry:" + str(ip_retry_count) + "]"
-        screen_msg2 = "We will retry every 10 seconds to get an IP from the Pi"
-        screen_msg3 = "If it doesn't correct itself, please check your Pi's Network settings."
+        screen_msg2 = "We will retry every 10 seconds to get an IP address"
+        screen_msg3 = "If it doesn't correct itself, please check your network settings."
+        background_color = (130,202,156)
     
     else:
         screen_msg1 = "Unknown Error"
         screen_msg2 = "Oh no. Maybe check your setup?"
         screen_msg3 = "Configuration webpage located at http://" + str(system_ip_address)
+        background_color = (255, 0, 0)
 
 
-    background_color = (255, 0, 0)  # Red color in RGB
 
     font1 = pygame.font.Font(None, 48)  # None specifies the default font
     font2 = pygame.font.Font(None, 36)  # None specifies the default font
