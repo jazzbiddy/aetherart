@@ -134,7 +134,7 @@ def getLocalIPAddress():
 
         has_ip_address = True
 
-        print ('IP Addr: ' + str(system_ip_address))
+        
 
         return ip_address
         
@@ -224,9 +224,6 @@ print ('Screen Height: ' + str(screen_height))
 
 ### POST SETTINGS INTERNAL VARIABLES
 
-# Image request headers
-headers = {'Authorization': 'Client-ID ' + api_key}
-
 # photo refresh timers
 image_last_change_time = 0
 
@@ -234,10 +231,11 @@ image_last_change_time = 0
 # When the settings are updated from the web page, a file is written
 # to trigger the reloading of settings. 
 force_load_last_check_time = 0
-force_load_check_interval = 10  # this will check for the presence of the force load file every N seconds
+force_load_check_interval = 5  # this will check for the presence of the force load file every N seconds
 
 # IP ADDRESS information
 system_ip_address = getLocalIPAddress()
+print ('IP Addr: ' + str(system_ip_address))
 ip_last_check_time = 0
 ip_check_interval = 10
 ip_retry_count = 0
@@ -265,8 +263,9 @@ def get_new_photo():
 
     has_error = False
 
+    headers = {'Authorization': 'Client-ID ' + api_key}
 
-    load_settings()
+    # load_settings()
 
     has_photo = False
 
@@ -292,6 +291,10 @@ def get_new_photo():
         api_limit = json_response.headers.get("X-Ratelimit-Remaining")
 
         print (json_response)
+
+
+
+
     except:
         print ("json request has error!")
         has_error = True
@@ -436,6 +439,7 @@ def check_reload_flag():
     global image_last_change_time
     global force_load_found
 
+
     # Check for the exit signal flag file
     if os.path.exists('reload_flag.txt'):
         os.remove('reload_flag.txt')
@@ -445,6 +449,7 @@ def check_reload_flag():
         load_settings()
         image_last_change_time = 0
         force_load_found = True
+
 
 def show_error_screen(error_type):
 
@@ -507,6 +512,7 @@ while slideshow_running:
 
     # Set the current time for all time checks
     currentTime = time.time()
+    
 
 
     # The first issue could be that there is no IP address for the IP
@@ -528,7 +534,8 @@ while slideshow_running:
         
 
     # force load check
-    if currentTime >= force_load_check_interval:
+    if currentTime >= force_load_last_check_time:
+        
         check_reload_flag()
         force_load_last_check_time = currentTime + force_load_check_interval
 
@@ -537,9 +544,9 @@ while slideshow_running:
         show_error_screen(1)
         continue
     
-
+    
     # normal slide show image change check
-    if currentTime >= image_last_change_time:  
+    if currentTime >= image_last_change_time: 
         print('----------')
         print ('Current Time: ' + getLocalTime(currentTime))
         # print ('IMG CHNG TIME: ' + getLocalTime(image_last_change_time))          
@@ -548,12 +555,16 @@ while slideshow_running:
         get_new_photo()
     
         if not has_photo:
+            
             if invalid_api_key:
+                
                 show_error_screen(2)
             else:
+                
                 show_error_screen(3) 
                 
         else:
+            
             print ('Success Downloading Photo')
             print('----------')
             print ('Merging photo with frame')
@@ -563,8 +574,9 @@ while slideshow_running:
         image_last_change_time = currentTime + refresh_interval
         print ('Next Image Get Time: ' + getLocalTime(image_last_change_time)) 
 
-
+   
     if has_merged_image and not has_swapped_screen:
+        
         print ('Updating Pygame with merged image')
 
         # Convert the merged image to a format compatible with pygame

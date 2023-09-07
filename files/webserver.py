@@ -166,9 +166,9 @@ class MyHandler(BaseHTTPRequestHandler):
             # Save the updated settings back to the JSON file
             save_settings(settings)
            
-            if (not awaiting_frame_update):
-                open('reload_flag.txt', 'w').close()
-                awaiting_frame_update = True
+            
+            open('reload_flag.txt', 'w').close()
+            awaiting_frame_update = True
 
             self.send_response(302)
             self.send_header('Location', '/')
@@ -188,9 +188,9 @@ class MyHandler(BaseHTTPRequestHandler):
             # Save the updated settings back to the JSON file
             save_settings(settings)
             
-            if (not awaiting_frame_update):
-                open('reload_flag.txt', 'w').close()
-                awaiting_frame_update = True
+           
+            open('reload_flag.txt', 'w').close()
+            awaiting_frame_update = True
 
             self.send_response(302)
             self.send_header('Location', '/')
@@ -198,9 +198,9 @@ class MyHandler(BaseHTTPRequestHandler):
         
         elif self.path == '/photo':
             
-            if (not awaiting_frame_update):
-                open('reload_flag.txt', 'w').close()
-                awaiting_frame_update = True
+            
+            open('reload_flag.txt', 'w').close()
+            awaiting_frame_update = True
 
             self.send_response(302)
             self.send_header('Location', '/')
