@@ -326,6 +326,7 @@ def get_new_photo():
                         file.write(image_data)
                     
                     has_photo = True
+                    invalid_api_key = False
                     
                     # print(f"Image downloaded and saved to {local_file_path}")
                 else:
