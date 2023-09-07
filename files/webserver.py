@@ -1,11 +1,9 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
-import os
 import urllib.parse
 
-
-
 save_status = 0
+
 
 # Load the settings from the JSON file
 def load_settings():
@@ -21,7 +19,11 @@ def load_settings():
                 "orientation": 1,
                 "content_filter": 1,
                 "frame_number": 1,
-                "api_key": ""
+                "api_key": "", 
+                "api_limit": -1,
+                "last_photo_time": "",
+                "next_photo_time": ""
+
         }
 
 # Save the settings to the JSON file
@@ -47,13 +49,9 @@ class MyHandler(BaseHTTPRequestHandler):
 
                 # Inject the settings values into the HTML form fields
                 
-                html_content = html_content.replace('{{screen_number}}',  str(settings['screen_number']))
-                html_content = html_content.replace('{{refresh_interval}}',  str(settings['refresh_interval']))
-                html_content = html_content.replace('{{categories}}',  str(settings['categories']))
-                html_content = html_content.replace('{{orientation}}',  str(settings['orientation']))
-                html_content = html_content.replace('{{content_filter}}', str(settings['content_filter']))
-                # html_content = html_content.replace('{{frame_number}}', str(settings['frame_number']))
-                html_content = html_content.replace('{{api_key}}', str(settings['api_key']))
+                html_content = html_content.replace('{{api_limit}}',  str(settings['api_limit']))
+                html_content = html_content.replace('{{last_photo_time}}',  str(settings['last_photo_time']))
+                html_content = html_content.replace('{{next_photo_time}}',  str(settings['next_photo_time']))
                 
 
             self.wfile.write(html_content.encode())
@@ -111,12 +109,18 @@ class MyHandler(BaseHTTPRequestHandler):
             self.end_headers()
             with open('webserver/style.css', 'rb') as file:
                 self.wfile.write(file.read())
+        
+        elif self.path == '/image.jpg':
+            # Serve the image file (image.jpg)
+            self.send_response(200)
+            self.send_header('Content-type', 'image/jpeg')
+            self.end_headers()
+            with open('images/image.jpg', 'rb') as file:
+                self.wfile.write(file.read())
+            
         else:
             self.send_error(404, "File not found")
     
-    
-    
-   
     def do_POST(self):
         global save_status
 
@@ -163,43 +167,33 @@ class MyHandler(BaseHTTPRequestHandler):
             # Save the updated settings back to the JSON file
             save_settings(settings)
             save_status= 1
-
+            
             open('reload_flag.txt', 'w').close()
 
             self.send_response(302)
             self.send_header('Location', '/api')
             self.end_headers()
         
-        
-        elif self.path == '/':
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length).decode()
-            post_vars = dict(x.split("=") for x in post_data.split("&"))
-
-            # Load settings from the JSON file
-            settings = load_settings()
-
-            decoded_query = urllib.parse.unquote(post_vars['query'])
-            decoded_query = decoded_query.replace('+', ' ')
-            decoded_api_url = urllib.parse.unquote(post_vars['api_url'])
-            decoded_api_url = decoded_api_url.replace('+', ' ')
-
-            # Update the settings with the values from the POST request
-            settings['query'] = decoded_query
-            settings['refresh_rate'] = int(post_vars['refresh_rate'])
-            settings['api_key'] = post_vars['api_key']
-            settings['api_url'] = decoded_api_url
-            settings['orientation'] = int(post_vars['orientation'])
-            settings['content_filter'] = int(post_vars['content_filter'])
-
-            # Save the updated settings back to the JSON file
-            save_settings(settings)
+        elif self.path == '/photo':
+            
             open('reload_flag.txt', 'w').close()
 
             self.send_response(302)
             self.send_header('Location', '/')
             self.end_headers()
+        
+        elif self.path == '/reboot':
+            # Respond to the shutdown request
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
 
+            # Execute the shutdown command (you may need to adjust the command)
+            import subprocess
+            subprocess.Popen(['sudo', 'reboot'])
+
+            # Optionally, you can send a message back to the client
+            self.wfile.write("rebooting...".encode())
 
         elif self.path == '/shutdown':
             # Respond to the shutdown request
@@ -213,10 +207,10 @@ class MyHandler(BaseHTTPRequestHandler):
 
             # Optionally, you can send a message back to the client
             self.wfile.write("Shutting down...".encode())
+
         else:
             self.send_error(404, "File not found")
-        
-
+    
 def run_server():
     server_address = ('0.0.0.0', 80)
     httpd = HTTPServer(server_address, MyHandler)
@@ -225,3 +219,4 @@ def run_server():
 
 if __name__ == '__main__':
     run_server()
+

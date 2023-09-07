@@ -5,5 +5,8 @@
     "content_filter": 1,
     "screen_number": 1,
     "frame_number": 1,
-    "api_key": ""
+    "api_key": "",
+    "api_limit": "-1",
+    "last_photo_time": "",
+    "next_photo_time": ""
 }

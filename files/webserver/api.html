@@ -25,25 +25,23 @@
   </head>
   <body>
 
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
-      <div class="container-fluid">
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
-              <span class="navbar-toggler-icon"></span>
-          </button>
-          <span class="navbar-brand noselect">Aether Art Configurator</span>
-          <div class="collapse navbar-collapse" id="navbarNav">
-              <ul class="navbar-nav ml-auto"> <!-- ml-auto for right alignment -->
-                  <li class="nav-item">
-                      <a class="nav-link" href="/">Status</a>
-                  </li>
-                  <li class="nav-item">
-                      <a class="nav-link" href="/settings">Settings</a>
-                  </li>
-                  <li class="nav-item">
-                      <a class="nav-link" href="/api">Unsplash Setup</a>
-                  </li>
-              </ul>
-          </div>
+    <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+      <a class="navbar-brand" href="/">Aether Art Configurator</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/settings">Settings</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/api">Photo Setup</a>
+          </li>
+        </ul>
       </div>
     </nav>
   
@@ -56,10 +54,39 @@
         <strong>Success!</strong><br> Your settings were saved. The Aether Art display will refresh shortly.
       </div>
 
+      <div class="col-sm">
+        <span class="groupTitle">Instructions</span>
+      </div>
 
-      <div id="pnlInstructionsRow" class="alert alert-info">
-          <strong>Instructions:</strong><br>  
-          information
+      <div id="pnlInstructionsRow" class="alert alert-warning">
+          
+          The photos that appear in the Aether Art frame are downloaded from the <a href="https://unsplash.com/" target="_blank"><b>Unsplash</b></a> photo service. 
+          You will need to create a free account with this service for the frame to work. <br><br>
+
+          <b>Follow these steps to sign up for an Access Key:</b><br><br>
+
+          <ul>
+            <li>Visit the Unsplash Developers web page at <a href="https://unsplash.com/developers" target="_blank"><b>https://unsplash.com/developers</b></a>.</li>
+            <li>Click on the "<b>Register as a Developer</b>" in the menu on that page.</li>
+            <li>Fill out the <b>Join Unsplash Registration Form</b> with your information.</li>
+            <li>After completing the form you will be presented with the Welcome screen. </li>
+            <li>Click on the "<b>New Application</b>" link in the middle of the page.</li>
+            <li>Read and Accept their terms of use. A popup will appear asking for the Application Name and Description.</li>
+            <li>Enter "<em>Photo Viewer</em>" for the <b>Application name</b></li>
+            <li>Enter "<em>A personal use application that displays photos</em>" for the <b>Description</b> and submit the form.</li>
+            <li>In the middle of the next page you will see a section labelled "<b>Keys</b>". </li>
+            <li>Copy the "<b>Access Key</b>".</li>
+            <li>Done!</li>
+        </ul>
+
+       
+        Once you have the Access Key copied, enter it into the form below and click submit. <br>
+        Your Aether Art frame will update and start displaying photos! 
+        <br><br>
+
+
+
+          
       </div>
 
 
@@ -67,7 +94,7 @@
       <form action="/api" method="post">
         
         <div class="col-sm">
-          <span class="groupTitle">Photo API Setup</span>
+          <span class="groupTitle">Photo Setup</span>
         </div>
 
         <div id="pnlform" class="formZone">
@@ -77,7 +104,7 @@
           
 
           <div class="form-group">
-            <label>Unsplash API Key</label>
+            <label class="labelBold">Unsplash Access Key</label>
             <div class="input-group">
               <input id="api_key" name="api_key" type="password" class="form-control"> 
               <div class="input-group-append" style="cursor:  pointer;">
@@ -88,7 +115,7 @@
               </div>
             </div>
 
-            <small id="screenNumberHelp" class="form-text text-muted">Enter your <a href="https://unsplash.com/developers" target="_blank">Unsplash</a> API Key in this field. </small>
+            <small id="screenNumberHelp" class="form-text text-muted">Enter your <a href="https://unsplash.com/developers" target="_blank">Unsplash</a> Access Key in this field. </small>
           </div>
           
           <button type="submit" class="btn btn-primary">Submit</button>

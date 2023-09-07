@@ -9,7 +9,7 @@ import os
 import socket
 
 
-### USER SETTINGS
+### USER SETTINGS - Can be changed using web ui
 
 # Display Information
 screen_number = 1
@@ -18,7 +18,6 @@ refresh_interval = 5
 categories = 'turtles, cats, dogs'
 orientation = 1
 content_filter = 1
-frame_number = 1
 # API Account Information
 api_key = ''
 
@@ -33,7 +32,12 @@ has_photo = False
 has_merged_image = False
 has_swapped_screen = False
 api_url = 'https://api.unsplash.com/photos/random?'
+frame_number = 1
+api_limit = -1
+last_photo_time = ''
+next_photo_time = ''
 frame_path = ''
+settings_filename = 'settings.json'
 
 
 def load_settings():
@@ -47,10 +51,13 @@ def load_settings():
     global frame_number
     global api_key
     global has_api_key
+    global api_limit
+    global last_photo_time
+    global next_photo_time
 
     
     # Load settings from settings.json
-    with open('settings.json', 'r') as settings_file:
+    with open(settings_filename, 'r') as settings_file:
         settings = json.load(settings_file)
 
     # Extract variables from the settings
@@ -61,6 +68,9 @@ def load_settings():
     content_filter = settings.get('content_filter', content_filter)
     frame_number = settings.get('frame_number', frame_number) - 1
     api_key = settings.get('api_key', api_key)
+    api_limit = settings.get('api_limit', api_limit)
+    last_photo_time = settings.get('last_photo_time', last_photo_time)
+    next_photo_time = settings.get('next_photo_time', next_photo_time)
 
     if (api_key != ''):
         has_api_key = True
@@ -75,6 +85,13 @@ def load_settings():
     print ('frame_number: ' + str(frame_number))
     print ('api_key: ' + str(api_key))
     print ('Has API Key: ' + str(has_api_key))
+    print ('api limit: ' + str(api_limit))
+    print ('last photo time: ' + str(last_photo_time))
+    print ('next photo time: ' + str(next_photo_time))
+
+def save_settings(settings):
+    with open('settings.json', 'w') as json_file:
+        json.dump(settings, json_file, indent=4)
 
 # load settings
 load_settings()    
@@ -116,25 +133,85 @@ def getLocalIPAddress():
 
         has_ip_address = True
 
+        print ('Pi IP Addr: ' + str(system_ip_address))
+
         return ip_address
         
     except Exception as e:
+        has_ip_address = False
         return str(e)
 
-def get_resolution():
-    pygame.init()
-    # num_screens = pygame.display.get_num_displays()
-    # print ('Number of screens: ' + str(num_screens))
+def startPygame():
+    global screen
+    global display_info
 
-    resolution = None
     pygame.init()
+
     screen = pygame.display.set_mode()  # Create a minimal window
-    info = pygame.display.Info()
-    pygame.quit()
+    display_info = pygame.display.Info()
 
-    resolution = (info.current_w, info.current_h)
+    #hide mouse cursor
+    pygame.mouse.set_visible(False)
+
+def getDisplayResolution():
+ 
+    resolution = None
+    
+    resolution = (display_info.current_w, display_info.current_h)
+    
     return resolution
 
+def getLocalTime(timestamp):
+    
+    local_time = time.localtime(timestamp)
+
+    # You can format the local_time as a string if needed
+    #formatted_time = time.strftime("%Y-%m-%d %H:%M:%S", local_time)
+    formatted_time = time.strftime("%I:%M %p, %a %b %d %Y", local_time)
+    
+    # Split the formatted time into parts
+    parts = formatted_time.split()
+
+    # Check the hour part and remove the leading zero if present
+    hour_part = parts[0]
+    if hour_part.startswith("0"):
+        hour_part = hour_part[1:]
+
+    # Join the parts back together
+    formatted_time = " ".join([hour_part] + parts[1:])
+
+
+    return formatted_time
+
+def updateStatus():
+
+    try:
+        with open(settings_filename, 'r') as json_file:
+            settings = json.load(json_file)
+    
+    
+
+            # Update the settings with the values from the POST request
+            settings['api_limit'] = api_limit
+            settings['last_photo_time'] = last_photo_time
+            settings['next_photo_time'] = next_photo_time
+
+            
+            # Save the updated settings back to the JSON file
+            save_settings(settings)
+    except FileNotFoundError:
+        print('Error saving status updates')
+
+
+
+### Start pygame and get display resolution
+startPygame()
+
+screen_info = getDisplayResolution()
+screen_width = screen_info[0]
+screen_height = screen_info[1]
+print ('Screen Width: ' + str(screen_width))
+print ('Screen Height: ' + str(screen_height))
 
 
 ### POST SETTINGS INTERNAL VARIABLES
@@ -142,21 +219,20 @@ def get_resolution():
 # Image request headers
 headers = {'Authorization': 'Client-ID ' + api_key}
 
-screen_info = get_resolution()
-screen_width = screen_info[0]
-screen_height = screen_info[1]
-print ('Screen Width: ' + str(screen_width))
-print ('Screen Height: ' + str(screen_height))
-
 # photo refresh timers
-#image_change_time = time.time() + refresh_interval
-image_change_time = 0
+image_last_change_time = 0
 
 # force load: 
 # When the settings are updated from the web page, a file is written
 # to trigger the reloading of settings. 
 force_load_last_check_time = 0
 force_load_check_interval = 10  # this will check for the presence of the force load file every N seconds
+
+# IP ADDRESS information
+system_ip_address = getLocalIPAddress()
+ip_last_check_time = 0
+ip_check_interval = 10
+ip_retry_count = 0
 
 # slideshow settings
 slideshow_running = True
@@ -171,15 +247,13 @@ frame_default_height = 2160
 photo_default_width = 3240
 photo_default_height = 1560
 
-system_ip_address = getLocalIPAddress()
-print ('Pi IP Addr: ' + str(system_ip_address))
-
 
 
 
 def get_new_photo():
     global has_photo
     global invalid_api_key
+    global api_limit
 
     has_error = False
 
@@ -207,6 +281,7 @@ def get_new_photo():
     
     try:
         json_response = requests.get(api_address, headers=headers,)
+        api_limit = json_response.headers.get("X-Ratelimit-Remaining")
 
         print (json_response)
     except:
@@ -349,7 +424,7 @@ def merge_photo_and_frame():
     has_swapped_screen = False
 
 def check_reload_flag():
-    global image_change_time
+    global image_last_change_time
     # Check for the exit signal flag file
     if os.path.exists('reload_flag.txt'):
         os.remove('reload_flag.txt')
@@ -357,22 +432,10 @@ def check_reload_flag():
         
         # reload settings
         load_settings()
-        image_change_time = 0
+        image_last_change_time = 0
 
 
 
-# Initialize pygame
-pygame.init()
-
-# Create a window
-screen = pygame.display.set_mode((screen_width, screen_height))
-#screen = pygame.display.set_mode()
-
-#hide mouse cursor
-pygame.mouse.set_visible(False)
-
-
-# Error Screen
 def show_error_screen(error_type):
 
     if error_type == 1:
@@ -389,6 +452,11 @@ def show_error_screen(error_type):
         screen_msg1 = "Issue Getting Photo"
         screen_msg2 = "There was an unknown error :( "
         screen_msg3 = "Check configuration webpage at http://" + str(system_ip_address) + " to fix."
+
+    elif error_type == 4:
+        screen_msg1 = "Issue Getting IP Address. [Retry:" + str(ip_retry_count) + "]"
+        screen_msg2 = "We will retry every 10 seconds to get an IP from the Pi"
+        screen_msg3 = "If it doesn't correct itself, please check your Pi's Network settings."
     
     else:
         screen_msg1 = "Unknown Error"
@@ -423,8 +491,27 @@ while slideshow_running:
             if event.key == pygame.K_p:  # Check if the 'p' key is pressed. if it is - quit
                 slideshow_running = False           
 
-    
+    # Set the current time for all time checks
     currentTime = time.time()
+
+
+    # The first issue could be that there is no IP address for the IP
+    # Without the IP, the web configuration tool can't be accessed.
+    # And perhaps the network can't be used to download photos
+    # So we're going to pause, put up a message and keep re-trying to 
+    # to get the IP
+
+    if not has_ip_address:
+        
+        show_error_screen(4)
+
+        if currentTime >= ip_last_check_time:
+            ip_retry_count = ip_retry_count + 1
+            system_ip_address = getLocalIPAddress()
+            ip_last_check_time = currentTime + ip_check_interval
+        
+        continue
+        
 
     # force load check
     if currentTime >= force_load_check_interval:
@@ -434,51 +521,55 @@ while slideshow_running:
 
     if not has_api_key:
         show_error_screen(1)
-    else:
-        # normal slide show image change check
-        if currentTime >= image_change_time:  
-            print('----------')
-            print ('TIME: ' + str(currentTime))
-            print ('IMG CHNG TIME: ' + str(image_change_time))          
+        continue
+    
 
-            print ('Getting New Photo')
-            get_new_photo()
-        
-            if not has_photo:
-                if invalid_api_key:
-                    show_error_screen(2)
-                else:
-                   show_error_screen(3) 
-                   
+    # normal slide show image change check
+    if currentTime >= image_last_change_time:  
+        print('----------')
+        print ('Current Time: ' + getLocalTime(currentTime))
+        # print ('IMG CHNG TIME: ' + getLocalTime(image_last_change_time))          
+
+        print ('Getting New Photo')
+        get_new_photo()
+    
+        if not has_photo:
+            if invalid_api_key:
+                show_error_screen(2)
             else:
-                print ('Success Downloading Photo')
-                print('----------')
-                print ('Merging photo with frame')
-                merge_photo_and_frame()
+                show_error_screen(3) 
+                
+        else:
+            print ('Success Downloading Photo')
+            print('----------')
+            print ('Merging photo with frame')
+            merge_photo_and_frame()
 
-            # Update the timer for the next image change
-            image_change_time = currentTime + refresh_interval
+        # Update the timer for the next image change
+        image_last_change_time = currentTime + refresh_interval
+        print ('Next Image Get Time: ' + getLocalTime(image_last_change_time)) 
 
 
-        if has_merged_image and not has_swapped_screen:
-            print ('Updating Pygame with merged image')
+    if has_merged_image and not has_swapped_screen:
+        print ('Updating Pygame with merged image')
 
-                # Convert the merged image to a format compatible with pygame
-            pygame_image = pygame.image.fromstring(merged_image.tobytes(), merged_image.size, merged_image.mode)
+        # Convert the merged image to a format compatible with pygame
+        pygame_image = pygame.image.fromstring(merged_image.tobytes(), merged_image.size, merged_image.mode)
 
-            # Blit (draw) the image onto the screen
-            screen.blit(pygame_image, (0, 0))
+        # Blit (draw) the image onto the screen
+        screen.blit(pygame_image, (0, 0))
 
-            # Update the display
-            pygame.display.flip()
+        # Update the display
+        pygame.display.flip()
 
-            has_swapped_screen = True
-
-        
+        has_swapped_screen = True
+        last_photo_time = getLocalTime(currentTime)
+        next_photo_time = getLocalTime(image_last_change_time)
+        # update the status
+        updateStatus()
 
 
 ### Slideshow is no longer running. quit pygame and this script    
-
 # Quit pygame
 pygame.quit()
 
