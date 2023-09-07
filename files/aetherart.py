@@ -439,12 +439,12 @@ def check_reload_flag():
 def show_error_screen(error_type):
 
     if error_type == 1:
-        screen_msg1 = "Missing Photos API Key"
-        screen_msg2 = "Open configuration webpage at http://" + str(system_ip_address) 
-        screen_msg3 = ""  
+        screen_msg1 = "Missing Photos Access Key"
+        screen_msg2 = "Open configuration webpage at http://" + str(system_ip_address) + "/api"
+        screen_msg3 = "To enter your access key."  
         
     elif error_type == 2:
-        screen_msg1 = "Invalid Photos API Key"
+        screen_msg1 = "Invalid Photos Access Key"
         screen_msg2 = "Error using provided key"
         screen_msg3 = "Use configuration webpage at http://" + str(system_ip_address) + " to fix."
     
@@ -460,7 +460,7 @@ def show_error_screen(error_type):
     
     else:
         screen_msg1 = "Unknown Error"
-        screen_msg2 = "Who knows. Check your setup?"
+        screen_msg2 = "Oh no. Maybe check your setup?"
         screen_msg3 = "Configuration webpage located at http://" + str(system_ip_address)
 
 
